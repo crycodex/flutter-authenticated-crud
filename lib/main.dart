@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teslo_shop/config/config.dart';
-import 'package:teslo_shop/config/router/app_router.dart';
 
-void main() {
-  const ProviderScope(child: MainApp());
+void main() async {
+  await Enviroment.initEnv();
+  runApp(
+    const ProviderScope(child: MainApp()),
+  );
 }
 
 class MainApp extends StatelessWidget {
