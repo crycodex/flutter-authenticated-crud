@@ -5,27 +5,35 @@ import 'package:teslo_shop/features/auth/infraestructure/mappers/user_mapper.dar
 import 'package:teslo_shop/features/auth/infraestructure/infraestructure.dart';
 
 class AuthDatasourceImpl extends AuthDatasource {
-  final dio = Dio(BaseOptions(baseUrl: Enviroment.apiUrl));
+  final Dio dio;
 
-  final AuthDatasource authDatasource;
-
-  AuthDatasourceImpl({AuthDatasource? authDatasource})
-      : authDatasource = authDatasource ?? AuthDatasourceImpl();
+  AuthDatasourceImpl({Dio? dio})
+      : dio = dio ?? Dio(BaseOptions(baseUrl: Enviroment.apiUrl));
 
   @override
-  Future<User> checkAuthStatus(String token) {
-    return authDatasource.checkAuthStatus(token);
+  Future<User> checkAuthStatus(String token) async {
+    try {
+      final Response<dynamic> response = await dio.get<dynamic>(
+        '/auth/check-status',
+        options: Options(headers: <String, dynamic>{'Authorization': 'Bearer $token'}),
+      );
+      final User user = UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
+      return user;
+    } catch (e) {
+      throw InvalidTokenError();
+    }
   }
 
   @override
   Future<User> login(String email, String password) async {
     try {
-      final response = await dio.post("/auth/login", data: {
+      final Response<dynamic> response = await dio.post<dynamic>("/auth/login", data: {
         "email": email,
         "password": password,
       });
-
-      final user = UserMapper.userJsonToEntity(response.data);
+      final User user =
+          UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
+    
       return user;
     } catch (e) {
       throw WrongCredentialsError();
@@ -33,8 +41,20 @@ class AuthDatasourceImpl extends AuthDatasource {
   }
 
   @override
-  Future<User> register(String email, String password, String name,
-      List<String> roles, String token) {
-    return authDatasource.register(email, password, name, roles, token);
+  Future<User> register(
+      String email, String password, String name, List<String> roles, String token) async {
+    try {
+      final Response<dynamic> response = await dio.post<dynamic>("/auth/register", data: {
+        "email": email,
+        "password": password,
+        "fullName": name,
+        "roles": roles,
+      });
+      final User user =
+          UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
+      return user;
+    } catch (e) {
+      throw WrongCredentialsError();
+    }
   }
 }

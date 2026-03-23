@@ -12,7 +12,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepostory authRepostory;
   AuthNotifier({required this.authRepostory}) : super(AuthState());
 
-  void loginUser(String email, String password) async {
+  Future<void> loginUser(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
     try {
