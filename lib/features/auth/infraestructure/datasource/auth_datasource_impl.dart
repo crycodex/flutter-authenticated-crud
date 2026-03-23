@@ -15,9 +15,11 @@ class AuthDatasourceImpl extends AuthDatasource {
     try {
       final Response<dynamic> response = await dio.get<dynamic>(
         '/auth/check-status',
-        options: Options(headers: <String, dynamic>{'Authorization': 'Bearer $token'}),
+        options: Options(
+            headers: <String, dynamic>{'Authorization': 'Bearer $token'}),
       );
-      final User user = UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
+      final User user =
+          UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
       return user;
     } catch (e) {
       throw InvalidTokenError();
@@ -27,24 +29,45 @@ class AuthDatasourceImpl extends AuthDatasource {
   @override
   Future<User> login(String email, String password) async {
     try {
-      final Response<dynamic> response = await dio.post<dynamic>("/auth/login", data: {
+      final Response<dynamic> response =
+          await dio.post<dynamic>("/auth/login", data: {
         "email": email,
         "password": password,
       });
       final User user =
           UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
-    
+
       return user;
+    } on DioError catch (e) {
+      print(e.response?.data);
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw ConnectionTimeoutError();
+      }
+      switch (e.response?.statusCode) {
+        case 401:
+          throw WrongCredentialsError();
+        case 403:
+          throw InvalidTokenError();
+        case 500:
+          throw CustomError(
+              message: e.response?.data['message'],
+              errorCode: e.response?.statusCode ?? 0);
+        default:
+          throw CustomError(
+              message: e.response?.data['message'],
+              errorCode: e.response?.statusCode ?? 0);
+      }
     } catch (e) {
-      throw WrongCredentialsError();
+      throw Exception();
     }
   }
 
   @override
-  Future<User> register(
-      String email, String password, String name, List<String> roles, String token) async {
+  Future<User> register(String email, String password, String name,
+      List<String> roles, String token) async {
     try {
-      final Response<dynamic> response = await dio.post<dynamic>("/auth/register", data: {
+      final Response<dynamic> response =
+          await dio.post<dynamic>("/auth/register", data: {
         "email": email,
         "password": password,
         "fullName": name,

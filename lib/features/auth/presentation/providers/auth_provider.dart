@@ -20,6 +20,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       _setLoggedUser(user);
     } on WrongCredentialsError {
       logout('Credenciales incorrectas');
+    } on InvalidTokenError {
+      logout('Token inválido');
+    } on ConnectionTimeoutError {
+      logout('Tiempo de conexión agotado');
+    } on CustomError {
+      logout('Error al iniciar sesión');
     } on Exception {
       logout('Error al iniciar sesión');
     } catch (e) {
