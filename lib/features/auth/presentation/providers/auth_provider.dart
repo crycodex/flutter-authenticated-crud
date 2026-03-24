@@ -1,16 +1,24 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:teslo_shop/features/auth/domain/domain.dart';
 import 'package:teslo_shop/features/auth/infraestructure/infraestructure.dart';
+import 'package:teslo_shop/features/shared/infrastructure/services/key_value_storage_service_impl.dart';
+import 'package:teslo_shop/features/shared/infrastructure/services/key_value_storage_service.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepostory = AuthRepositoryImpl();
+  final keyValServ = KeyValueStorageServiceImpl();
 
-  return AuthNotifier(authRepostory: authRepostory);
+  return AuthNotifier(authRepostory: authRepostory, keyValServ: keyValServ);
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepostory authRepostory;
-  AuthNotifier({required this.authRepostory}) : super(AuthState());
+  final KeyValueStorageService keyValServ;
+
+  AuthNotifier({required this.authRepostory, required this.keyValServ})
+      : super(AuthState()) {
+    checkAuthStatus();
+  }
 
   Future<void> loginUser(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 300));
@@ -46,9 +54,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  void checkAuthStatus() async {}
-  _setLoggedUser(User user) {
+  void checkAuthStatus() async {
+    final token = await keyValServ.getValue<String>("token");
+
+    if (token == null) return logout();
+
+    try {
+      final user = await authRepostory.checkAuthStatus(token);
+      _setLoggedUser(user);
+    } catch (e) {
+      logout();
+    }
+  }
+
+  _setLoggedUser(User user) async {
     //token
+    await keyValServ.setKeyvalue("token", user.token);
+
     state = state.copyWith(
       status: AuthStatus.authenticated,
       user: user,
@@ -58,6 +80,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void logout([String? errorMessage]) async {
     //limpiar token
+    await keyValServ.removeKey("token");
+
     state = state.copyWith(
       status: AuthStatus.notAuthenticated,
       user: null,
