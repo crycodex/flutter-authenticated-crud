@@ -88,6 +88,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       authStatus: AuthStatus.notAuthenticated,
       errorMessage: errorMessage ?? 'Cerrando sesión...',
     );
+
+    //ruta
+    
   }
 }
 
