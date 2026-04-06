@@ -3,15 +3,20 @@ import 'package:go_router/go_router.dart';
 import 'package:teslo_shop/config/router/app_router_notifier.dart';
 import 'package:teslo_shop/features/auth/auth.dart';
 import 'package:teslo_shop/features/products/products.dart';
+import 'package:teslo_shop/features/auth/presentation/providers/auth_provider.dart';
 
 final goRouterProvider = Provider((ref) {
   final goRouteNotifier = ref.read(goRouteNotifierProvider);
 
   return GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/splash',
       refreshListenable: goRouteNotifier,
       routes: [
         ///* Auth Routes
+        GoRoute(
+          path: '/splash',
+          builder: (context, state) => const CheckStatusScreen(),
+        ),
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
@@ -19,10 +24,6 @@ final goRouterProvider = Provider((ref) {
         GoRoute(
           path: '/register',
           builder: (context, state) => const RegisterScreen(),
-        ),
-        GoRoute(
-          path: "/splash",
-          builder: (context, state) => const CheckStatusScreen(),
         ),
 
         ///* Product Routes
@@ -32,9 +33,26 @@ final goRouterProvider = Provider((ref) {
         ),
       ],
       redirect: (context, state) {
-        print(state.subloc);
+        final isGoingTo = state.subloc;
+        final authStatus = goRouteNotifier.authStatus;
 
-        // return "/login";
+        if (isGoingTo == "/splash" && authStatus == AuthStatus.checking) {
+          return null;
+        }
+
+        if (authStatus == AuthStatus.notAuthenticated) {
+          if (isGoingTo == "/login" || isGoingTo == "/register") {
+            return null;
+          }
+          return "/login";
+        }
+
+        if (authStatus == AuthStatus.authenticated) {
+          if (isGoingTo == "/login" || isGoingTo == "/register") {
+            return "/";
+          }
+        }
+
         return null;
       });
 });

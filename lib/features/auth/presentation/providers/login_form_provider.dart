@@ -69,8 +69,9 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     _touchEveryField();
     if (!state.isValid) return;
     print(state);
+    state = state.copyWith(isPosting: true);
     await loginUser(state.email.value, state.password.value);
-    
+    state = state.copyWith(isPosting: false);
   }
 
   _touchEveryField() {
@@ -86,9 +87,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
 final loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-
-
-      
   final loginUserCallback = ref.watch(authProvider.notifier).loginUser;
 
   return LoginFormNotifier(loginUser: loginUserCallback);
