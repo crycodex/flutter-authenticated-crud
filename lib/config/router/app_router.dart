@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:teslo_shop/config/router/app_router_notifier.dart';
 import 'package:teslo_shop/features/auth/auth.dart';
 import 'package:teslo_shop/features/products/products.dart';
 
 final goRouterProvider = Provider((ref) {
+  final goRouteNotifier = ref.read(goRouteNotifierProvider);
+
   return GoRouter(
-      initialLocation: '/splash',
+      initialLocation: '/login',
+      refreshListenable: goRouteNotifier,
       routes: [
         ///* Auth Routes
         GoRoute(
@@ -28,7 +32,7 @@ final goRouterProvider = Provider((ref) {
         ),
       ],
       redirect: (context, state) {
-        print('redirect: $state');
+        print(state.subloc);
 
         // return "/login";
         return null;
