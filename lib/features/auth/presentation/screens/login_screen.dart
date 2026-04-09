@@ -66,7 +66,7 @@ class _LoginForm extends ConsumerWidget {
 
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isEmpty) return;
-      //showSnackBar(context, next.errorMessage);
+      showSnackBar(context, next.errorMessage);
     });
 
     return Padding(
@@ -86,10 +86,13 @@ class _LoginForm extends ConsumerWidget {
           const SizedBox(height: 30),
           CustomTextFormField(
             label: 'Contraseña',
+            onFieldSubmitted: (_) =>
+                ref.read(loginFormProvider.notifier).onFormSubmitted(),
             obscureText: true,
             onChanged: (value) =>
                 ref.read(loginFormProvider.notifier).onPasswordChanged(value),
-            errorMessage: loginForm.password.errorMessage,
+            errorMessage:
+                loginForm.isFormPosted ? 'Error al iniciar sesión' : null,
           ),
           const SizedBox(height: 30),
           SizedBox(
