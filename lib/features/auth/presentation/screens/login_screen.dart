@@ -66,7 +66,7 @@ class _LoginForm extends ConsumerWidget {
 
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isEmpty) return;
-      showSnackBar(context, next.errorMessage);
+      //showSnackBar(context, next.errorMessage);
     });
 
     return Padding(

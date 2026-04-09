@@ -28,6 +28,7 @@ class KeyValueStorageServiceImpl extends KeyValueStorageService {
         break;
       case String:
         pref.setString(key, value as String);
+        break;
       default:
         throw UnimplementedError("Set not implement fot: ${T.runtimeType}");
     }
