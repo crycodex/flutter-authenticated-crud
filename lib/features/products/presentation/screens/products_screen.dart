@@ -59,8 +59,9 @@ class _ProductsViewState extends ConsumerState {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: MasonryGridView.count(
           crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
+          crossAxisSpacing: 30,
+          mainAxisSpacing: 20,
+          physics: const BouncingScrollPhysics(),
           itemCount: productState.products.length,
           itemBuilder: (context, index) {
             final product = productState.products[index];

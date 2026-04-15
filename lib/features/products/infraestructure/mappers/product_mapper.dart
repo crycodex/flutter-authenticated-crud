@@ -3,19 +3,48 @@ import 'package:teslo_shop/features/auth/infraestructure/mappers/user_mapper.dar
 import 'package:teslo_shop/features/products/domain/domain.dart';
 
 class ProductMapper {
-  static jsontoEntity(Map<String, dynamic> json) => Product(
+  static jsontoEntity(Map<String, dynamic> json) {
+    final dynamic rawPrice = json['price'];
+    final int price = rawPrice is num
+        ? rawPrice.toInt()
+        : int.tryParse(rawPrice?.toString() ?? '') ?? 0;
+
+    final dynamic rawSizes = json['sizes'];
+    final List<String> sizes = rawSizes is List
+        ? rawSizes.map((dynamic size) => size.toString()).toList()
+        : const <String>[];
+
+    final dynamic rawTags = json['tags'];
+    final List<String> tags = rawTags is List
+        ? rawTags.map((dynamic tag) => tag.toString()).toList()
+        : const <String>[];
+
+    final dynamic rawImages = json['images'];
+    final List<String> images = rawImages is List
+        ? rawImages
+            .map((dynamic image) => image.toString())
+            .map((String image) => image.startsWith('http')
+                ? image
+                : '${Enviroment.apiUrl}/files/product/$image')
+            .toList()
+        : const <String>[];
+
+    final dynamic rawUser = json['user'];
+    final Map<String, dynamic> userJson =
+        rawUser is Map<String, dynamic> ? rawUser : <String, dynamic>{};
+
+    return Product(
       id: json['id'],
       title: json['title'],
-      price: double.parse(json['price']).toInt(),
+      price: price,
       description: json['description'],
       slug: json['slug'],
       stock: json['stock'] ?? 0,
-      sizes: List<String>.from(json['sizes'].map((size) => size.toString())),
+      sizes: sizes,
       gender: json['gender'],
-      tags: List<String>.from(json['tags'].map((tag) => tag.toString())),
-      images: List<String>.from(json['images'].map(((dynamic image) =>
-          image.startsWith("http")
-              ? image
-              : "${Enviroment.apiUrl}/files/product/$image"))),
-      user: UserMapper.userJsonToEntity(json['user']));
+      tags: tags,
+      images: images,
+      user: UserMapper.userJsonToEntity(userJson),
+    );
+  }
 }
