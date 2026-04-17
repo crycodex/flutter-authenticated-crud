@@ -29,15 +29,27 @@ class ProductsDatasourceImpl extends ProductsDatasource {
   Future<List<Product>> getProductByPage(
       {int limit = 10, int offset = 0}) async {
     try {
-      final response =
-          await dio.get<List>("/products?limit=$limit&offset=$offset");
-      final List<Product> products = [];
+      final response = await dio.get<dynamic>(
+        '/products',
+        queryParameters: <String, dynamic>{
+          'limit': limit,
+          'offset': offset,
+        },
+      );
 
-      for (final productJson in response.data ?? []) {
-        products.add(ProductMapper.jsontoEntity(productJson));
+      final data = response.data;
+      if (data is! List) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          message: 'Respuesta inesperada al listar productos',
+        );
       }
 
-      return products;
+      return data
+          .map<Product>((dynamic json) =>
+              ProductMapper.jsontoEntity(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw Exception();
     }

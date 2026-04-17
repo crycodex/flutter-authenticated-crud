@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:teslo_shop/features/products/presentation/providers/providers.dart';
+import 'package:teslo_shop/features/products/presentation/widgets/product_card.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -42,7 +43,13 @@ class _ProductsViewState extends ConsumerState {
   @override
   void initState() {
     super.initState();
-    ref.read(productsProvider.notifier).loadNextPage();
+    //scroll infinito
+    scrollController.addListener(() {
+      if (scrollController.position.pixels + 300 >=
+          scrollController.position.maxScrollExtent) {
+        ref.read(productsProvider.notifier).loadNextPage();
+      }
+    });
   }
 
   @override
@@ -58,6 +65,7 @@ class _ProductsViewState extends ConsumerState {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: MasonryGridView.count(
+          controller: scrollController,
           crossAxisCount: 2,
           crossAxisSpacing: 30,
           mainAxisSpacing: 20,
@@ -65,7 +73,7 @@ class _ProductsViewState extends ConsumerState {
           itemCount: productState.products.length,
           itemBuilder: (context, index) {
             final product = productState.products[index];
-            return Text(product.title);
+            return ProductCard(product: product);
           },
         ));
   }
