@@ -14,9 +14,23 @@ class ProductNotifier extends StateNotifier<ProductState> {
   final ProductsRepository productRepository;
 
   ProductNotifier({required this.productRepository, required String productId})
-      : super(ProductState(id: productId));
+      : super(ProductState(id: productId)) {
+    loadProduct();
+  }
 
-  Future<void> loadProduct() async {}
+  Future<void> loadProduct() async {
+    try {
+      final product = await productRepository.getProductById(state.id);
+
+      state = state.copyWith(
+        isLoading: false,
+        product: product,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      print(e);
+    }
+  }
 }
 
 class ProductState {
