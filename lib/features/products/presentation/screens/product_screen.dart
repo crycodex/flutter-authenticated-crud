@@ -83,6 +83,7 @@ class _ProductInformation extends ConsumerWidget {
           CustomProductField(
             label: "Descripción",
             initialValue: product.description,
+            maxLines: 5,
           ),
           const SizedBox(height: 10),
           CustomProductField(
@@ -96,13 +97,22 @@ class _ProductInformation extends ConsumerWidget {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
           const SizedBox(height: 15),
-          const Text("Extras"),
+          const Text("Extras",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          const Text("Tamaños"),
+          const SizedBox(height: 10),
           _SizesSelector(selectedSizes: product.sizes),
+          const SizedBox(height: 10),
+          const Text("Género"),
           const SizedBox(height: 10),
           _GenderSelector(gender: product.gender),
 
           const SizedBox(height: 15),
-          const Text("Existencias"),
+          const Text("Existencias",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+
           //existencias
           CustomProductField(
             label: "Stock",
@@ -110,56 +120,109 @@ class _ProductInformation extends ConsumerWidget {
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 10),
-          const CustomProductField(
-            label: "Tamaños",
-          ),
         ],
       ),
     );
   }
 }
 
-class _SizesSelector extends StatelessWidget {
+class _SizesSelector extends StatefulWidget {
   final List<String> selectedSizes;
-  final List<String> sizes = const ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
   const _SizesSelector({required this.selectedSizes});
+
+  @override
+  State<_SizesSelector> createState() => _SizesSelectorState();
+}
+
+class _SizesSelectorState extends State<_SizesSelector> {
+  static List<String> sizes = ["XS", "S", "M", "L", "XL", "XXL"];
+
+  late Set<String> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set.from(widget.selectedSizes);
+  }
+
+  @override
+  void didUpdateWidget(_SizesSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedSizes != widget.selectedSizes) {
+      _selected = Set.from(widget.selectedSizes);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
       showSelectedIcon: false,
+      multiSelectionEnabled: true,
       segments: sizes.map((size) {
         return ButtonSegment(
             value: size,
             label: Text(size, style: const TextStyle(fontSize: 12)));
       }).toList(),
-      selected: Set.from(selectedSizes),
+      selected: _selected,
       onSelectionChanged: (newSelection) {
-        print(newSelection);
+        setState(() {
+          _selected = newSelection;
+        });
       },
     );
   }
 }
 
-class _GenderSelector extends StatelessWidget {
+class _GenderSelector extends StatefulWidget {
   final String gender;
-  final List<String> genders = const ['men', 'women', 'kid', 'unisex'];
 
   const _GenderSelector({required this.gender});
+
+  @override
+  State<_GenderSelector> createState() => _GenderSelectorState();
+}
+
+class _GenderSelectorState extends State<_GenderSelector> {
+  static const List<String> genders = ['men', 'women', 'kid', 'unisex'];
+
+  late String _gender;
+
+  @override
+  void initState() {
+    super.initState();
+    final normalizeGender = widget.gender.toLowerCase();
+    _gender =
+        genders.contains(normalizeGender) ? normalizeGender : genders.first;
+  }
+
+  @override
+  void didUpdateWidget(_GenderSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.gender != widget.gender) {
+      final normalizeGender = widget.gender.toLowerCase();
+      _gender =
+          genders.contains(normalizeGender) ? normalizeGender : genders.first;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
       showSelectedIcon: false,
+      multiSelectionEnabled: false,
       segments: genders.map((gender) {
         return ButtonSegment(
             value: gender,
             label: Text(gender, style: const TextStyle(fontSize: 12)));
       }).toList(),
-      selected: {gender.toLowerCase()},
+      selected: {_gender},
       onSelectionChanged: (newSelection) {
-        print(newSelection);
+        if (newSelection.isEmpty) return;
+        setState(() {
+          _gender = newSelection.first;
+        });
+        print(_gender);
       },
     );
   }
