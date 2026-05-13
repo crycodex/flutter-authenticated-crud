@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teslo_shop/features/products/domain/domain.dart';
+import 'package:teslo_shop/features/products/presentation/providers/form/product_form_provider.dart';
 import 'package:teslo_shop/features/products/presentation/providers/product_provider.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
 import 'package:teslo_shop/features/products/presentation/widgets/widgets.dart';
@@ -30,13 +31,15 @@ class ProductScreen extends ConsumerWidget {
   }
 }
 
-class _ProductView extends StatelessWidget {
+class _ProductView extends ConsumerWidget {
   final Product product;
 
   const _ProductView({required this.product});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final productForm = ref.watch(productFormProvider(product));
+
     final textStyles = Theme.of(context).textTheme;
 
     return ListView(
@@ -44,12 +47,12 @@ class _ProductView extends StatelessWidget {
         SizedBox(
           height: 250,
           width: 500,
-          child: _ImageGallery(imgs: product.images),
+          child: _ImageGallery(imgs: productForm.images),
         ),
         const SizedBox(height: 10),
         Center(
           child: Text(
-            product.title,
+            productForm.title.value,
             style: textStyles.titleLarge,
           ),
         ),
@@ -67,6 +70,8 @@ class _ProductInformation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final productForm = ref.watch(productFormProvider(product));
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -77,24 +82,38 @@ class _ProductInformation extends ConsumerWidget {
           CustomProductField(
             isTopField: true,
             label: "Nombre",
-            initialValue: product.title,
+            initialValue: productForm.title.value,
+            onChanged: (value) => ref
+                .read(productFormProvider(product).notifier)
+                .onTitleChanged(value),
+            errorMessage: productForm.title.errorMessage,
           ),
           const SizedBox(height: 10),
           CustomProductField(
             label: "Descripción",
-            initialValue: product.description,
+            initialValue: productForm.description,
             maxLines: 5,
+            onChanged: (value) => ref
+                .read(productFormProvider(product).notifier)
+                .onDescriptionChanged(value),
           ),
           const SizedBox(height: 10),
           CustomProductField(
             label: "Slug",
-            initialValue: product.slug,
+            initialValue: productForm.slug.value,
+            onChanged: (value) =>
+                ref.read(productFormProvider(product).notifier).onSizeChanged,
+            errorMessage: productForm.slug.errorMessage,
           ),
           const SizedBox(height: 10),
           CustomProductField(
             label: "Precio",
-            initialValue: product.price.toString(),
+            initialValue: productForm.price.value.toString(),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) => ref
+                .read(productFormProvider(product).notifier)
+                .onPriceChanged(double.tryParse(value) ?? -1),
+            errorMessage: productForm.price.errorMessage,
           ),
           const SizedBox(height: 15),
           const Text("Extras",
@@ -102,7 +121,7 @@ class _ProductInformation extends ConsumerWidget {
           const SizedBox(height: 10),
           const Text("Tamaños"),
           const SizedBox(height: 10),
-          _SizesSelector(selectedSizes: product.sizes),
+          _SizesSelector(selectedSizes: productForm.sizes),
           const SizedBox(height: 10),
           const Text("Género"),
           const SizedBox(height: 10),
@@ -116,8 +135,12 @@ class _ProductInformation extends ConsumerWidget {
           //existencias
           CustomProductField(
             label: "Stock",
-            initialValue: product.stock.toString(),
+            initialValue: productForm.stock.value.toString(),
             keyboardType: TextInputType.number,
+            onChanged: (value) => ref
+                .read(productFormProvider(product).notifier)
+                .onStockChanged(int.tryParse(value) ?? -1),
+            errorMessage: productForm.stock.errorMessage,
           ),
           const SizedBox(height: 10),
         ],
@@ -169,6 +192,7 @@ class _SizesSelectorState extends State<_SizesSelector> {
         setState(() {
           _selected = newSelection;
         });
+        print("talla" + _selected.toString());
       },
     );
   }

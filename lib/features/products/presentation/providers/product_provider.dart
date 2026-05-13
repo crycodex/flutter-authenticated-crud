@@ -8,6 +8,7 @@ final productProvider = StateNotifierProvider.autoDispose
 
   return ProductNotifier(
       productRepository: productRepository, productId: productId);
+      
 });
 
 class ProductNotifier extends StateNotifier<ProductState> {
