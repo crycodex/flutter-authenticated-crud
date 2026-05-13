@@ -91,18 +91,20 @@ class _ProductInformation extends ConsumerWidget {
           const SizedBox(height: 10),
           CustomProductField(
             label: "Descripción",
-            initialValue: productForm.description,
+            initialValue: productForm.description.value,
             maxLines: 5,
             onChanged: (value) => ref
                 .read(productFormProvider(product).notifier)
                 .onDescriptionChanged(value),
+            errorMessage: productForm.description.errorMessage,
           ),
           const SizedBox(height: 10),
           CustomProductField(
             label: "Slug",
             initialValue: productForm.slug.value,
-            onChanged: (value) =>
-                ref.read(productFormProvider(product).notifier).onSizeChanged,
+            onChanged: (value) => ref
+                .read(productFormProvider(product).notifier)
+                .onSlugChanged(value),
             errorMessage: productForm.slug.errorMessage,
           ),
           const SizedBox(height: 10),
@@ -121,11 +123,19 @@ class _ProductInformation extends ConsumerWidget {
           const SizedBox(height: 10),
           const Text("Tamaños"),
           const SizedBox(height: 10),
-          _SizesSelector(selectedSizes: productForm.sizes),
+          _SizesSelector(
+              selectedSizes: productForm.sizes,
+              onSizesChanged: (sizes) => ref
+                  .read(productFormProvider(product).notifier)
+                  .onSizeChanged(sizes)),
           const SizedBox(height: 10),
           const Text("Género"),
           const SizedBox(height: 10),
-          _GenderSelector(gender: product.gender),
+          _GenderSelector(
+              gender: product.gender,
+              onGenderChanged: (gender) => ref
+                  .read(productFormProvider(product).notifier)
+                  .onGenderChanged(gender)),
 
           const SizedBox(height: 15),
           const Text("Existencias",
@@ -152,16 +162,18 @@ class _ProductInformation extends ConsumerWidget {
 class _SizesSelector extends StatefulWidget {
   final List<String> selectedSizes;
 
-  const _SizesSelector({required this.selectedSizes});
+  final Function(List<String> selectedSizes) onSizesChanged;
+
+  const _SizesSelector(
+      {required this.selectedSizes, required this.onSizesChanged});
 
   @override
   State<_SizesSelector> createState() => _SizesSelectorState();
 }
 
 class _SizesSelectorState extends State<_SizesSelector> {
-  static List<String> sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-
   late Set<String> _selected;
+  static List<String> sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
   @override
   void initState() {
@@ -180,6 +192,7 @@ class _SizesSelectorState extends State<_SizesSelector> {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
+      emptySelectionAllowed: true,
       showSelectedIcon: false,
       multiSelectionEnabled: true,
       segments: sizes.map((size) {
@@ -192,6 +205,7 @@ class _SizesSelectorState extends State<_SizesSelector> {
         setState(() {
           _selected = newSelection;
         });
+        widget.onSizesChanged(_selected.toList());
         print("talla" + _selected.toString());
       },
     );
@@ -201,7 +215,9 @@ class _SizesSelectorState extends State<_SizesSelector> {
 class _GenderSelector extends StatefulWidget {
   final String gender;
 
-  const _GenderSelector({required this.gender});
+  final Function(String gender) onGenderChanged;
+
+  const _GenderSelector({required this.gender, required this.onGenderChanged});
 
   @override
   State<_GenderSelector> createState() => _GenderSelectorState();
@@ -246,7 +262,8 @@ class _GenderSelectorState extends State<_GenderSelector> {
         setState(() {
           _gender = newSelection.first;
         });
-        print(_gender);
+        widget.onGenderChanged(_gender);
+        print("gender: $_gender");
       },
     );
   }

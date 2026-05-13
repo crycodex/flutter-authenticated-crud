@@ -68,6 +68,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
       Slug.dirty(state.slug.value),
       Price.dirty(state.price.value),
       Stock.dirty(state.stock.value),
+      Description.dirty(state.description.value),
     ]));
   }
 
@@ -79,6 +80,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           Slug.dirty(state.slug.value),
           Price.dirty(state.price.value),
           Stock.dirty(state.stock.value),
+          Description.dirty(state.description.value),
         ]));
   }
 
@@ -90,6 +92,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           Slug.dirty(value),
           Price.dirty(state.price.value),
           Stock.dirty(state.stock.value),
+          Description.dirty(state.description.value ),
         ]));
   }
 
@@ -101,6 +104,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           Slug.dirty(state.slug.value),
           Price.dirty(value),
           Stock.dirty(state.stock.value),
+          Description.dirty(state.description.value),
         ]));
   }
 
@@ -112,6 +116,19 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           Slug.dirty(state.slug.value),
           Price.dirty(state.price.value),
           Stock.dirty(value),
+          Description.dirty(state.description.value),
+        ]));
+  }
+
+  void onDescriptionChanged(String description) {
+    state = state.copyWith(
+        description: Description.dirty(description),
+        isFormValid: Formz.validate([
+          Title.dirty(state.title.value),
+          Slug.dirty(state.slug.value),
+          Price.dirty(state.price.value),
+          Stock.dirty(state.stock.value),
+          Description.dirty(description),
         ]));
   }
 
@@ -121,10 +138,6 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
 
   void onGenderChanged(String gender) {
     state = state.copyWith(gender: gender);
-  }
-
-  void onDescriptionChanged(String description) {
-    state = state.copyWith(description: description);
   }
 
   void onTagsChanged(String tags) {
@@ -147,8 +160,7 @@ class ProductFormState {
   final String gender;
   final String tags;
   final List<String> images;
-  final String description;
-
+  final Description description;
   ProductFormState({
     this.isFormValid = false,
     this.id,
@@ -160,7 +172,7 @@ class ProductFormState {
     this.gender = "men",
     this.tags = "",
     this.images = const [],
-    this.description = "",
+    this.description = const Description.dirty(""),
   });
 
   ProductFormState copyWith({
@@ -172,7 +184,7 @@ class ProductFormState {
     Stock? stock,
     List<String>? sizes,
     String? gender,
-    String? description,
+    Description? description,
     String? tags,
     List<String>? images,
   }) =>
