@@ -13,6 +13,7 @@ class ProductScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print("productId: $productId");
     final productState = ref.watch(productProvider(productId));
 
     return Scaffold(
@@ -26,7 +27,10 @@ class ProductScreen extends ConsumerWidget {
           ? const FullScreenLoader()
           : _ProductView(product: productState.product!),
       floatingActionButton:
-          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.save)),
+          FloatingActionButton(onPressed: () {
+            if(productState.product==null) return;
+            ref.read(productFormProvider(productState.product!).notifier).onFormSubmitted();
+          }, child: const Icon(Icons.save)),
     );
   }
 }

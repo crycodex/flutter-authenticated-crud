@@ -29,6 +29,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           gender: product.gender,
           tags: product.tags.join(", "),
           images: product.images,
+          description: Description.dirty(product.description),
         ));
 
   Future<bool> onFormSubmitted() async {
@@ -50,7 +51,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           .map((image) =>
               image.replaceAll("${Enviroment.apiUrl}/files/product/", ""))
           .toList(),
-      "description": state.description,
+      "description": state.description.value,
     };
 
     //onSubmitCallback(productLike);
@@ -92,7 +93,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
           Slug.dirty(value),
           Price.dirty(state.price.value),
           Stock.dirty(state.stock.value),
-          Description.dirty(state.description.value ),
+          Description.dirty(state.description.value),
         ]));
   }
 
