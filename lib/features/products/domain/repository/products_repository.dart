@@ -8,6 +8,6 @@ abstract class ProductsRepository {
 
   Future<List<Product>> searchProductsByTerm(String term);
 
-  Future<Product> createProduct(Product product);
+  Future<Product> createProduct(Map<String, dynamic> productLike);
 
 }
