@@ -4,12 +4,21 @@ import 'package:teslo_shop/features/products/domain/domain.dart';
 import 'package:teslo_shop/features/products/presentation/providers/form/product_form_provider.dart';
 import 'package:teslo_shop/features/products/presentation/providers/product_provider.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
-import 'package:teslo_shop/features/products/presentation/widgets/widgets.dart';
 
 class ProductScreen extends ConsumerWidget {
   final String productId;
 
   const ProductScreen({super.key, required this.productId});
+
+  /* msg */
+  void showSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text("Producto actualizado correctamente"),
+          backgroundColor: Colors.green),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,11 +35,18 @@ class ProductScreen extends ConsumerWidget {
       body: productState.isLoading
           ? const FullScreenLoader()
           : _ProductView(product: productState.product!),
-      floatingActionButton:
-          FloatingActionButton(onPressed: () {
-            if(productState.product==null) return;
-            ref.read(productFormProvider(productState.product!).notifier).onFormSubmitted();
-          }, child: const Icon(Icons.save)),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            if (productState.product == null) return;
+            ref
+                .read(productFormProvider(productState.product!).notifier)
+                .onFormSubmitted()
+                .then((value) {
+              if (!value) return;
+              showSnackbar(context);
+            });
+          },
+          child: const Icon(Icons.save)),
     );
   }
 }
