@@ -28,7 +28,6 @@ class ProductsDatasourceImpl extends ProductsDatasource {
           : await dio.post('/products', data: data);
 
       final product = ProductMapper.jsontoEntity(response.data);
-      print("product created: $product");
       return product;
     } on DioException catch (e) {
       throw ProductErrors(
