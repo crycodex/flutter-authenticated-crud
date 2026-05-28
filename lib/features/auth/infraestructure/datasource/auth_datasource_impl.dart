@@ -38,9 +38,13 @@ class AuthDatasourceImpl extends AuthDatasource {
           UserMapper.userJsonToEntity(response.data as Map<String, dynamic>);
 
       return user;
-    } on DioError catch (e) {
-      print(e.response?.data);
-      if (e.type == DioExceptionType.connectionTimeout) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw ConnectionTimeoutError();
+      }
+      if (e.type == DioExceptionType.connectionError) {
         throw ConnectionTimeoutError();
       }
       switch (e.response?.statusCode) {
