@@ -25,30 +25,33 @@ class ProductScreen extends ConsumerWidget {
     print("productId: $productId");
     final productState = ref.watch(productProvider(productId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(productState.product?.id == 'no-id'
-            ? "Nuevo producto"
-            : "Editar producto"),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt))
-        ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(productState.product?.id == 'no-id'
+              ? "Nuevo producto"
+              : "Editar producto"),
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt))
+          ],
+        ),
+        body: productState.isLoading
+            ? const FullScreenLoader()
+            : _ProductView(product: productState.product!),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              if (productState.product == null) return;
+              ref
+                  .read(productFormProvider(productState.product!).notifier)
+                  .onFormSubmitted()
+                  .then((value) {
+                if (!value) return;
+                showSnackbar(context);
+              });
+            },
+            child: const Icon(Icons.save)),
       ),
-      body: productState.isLoading
-          ? const FullScreenLoader()
-          : _ProductView(product: productState.product!),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            if (productState.product == null) return;
-            ref
-                .read(productFormProvider(productState.product!).notifier)
-                .onFormSubmitted()
-                .then((value) {
-              if (!value) return;
-              showSnackbar(context);
-            });
-          },
-          child: const Icon(Icons.save)),
     );
   }
 }
@@ -224,6 +227,7 @@ class _SizesSelectorState extends State<_SizesSelector> {
       }).toList(),
       selected: _selected,
       onSelectionChanged: (newSelection) {
+        FocusScope.of(context).unfocus();
         setState(() {
           _selected = newSelection;
         });
@@ -280,6 +284,7 @@ class _GenderSelectorState extends State<_GenderSelector> {
       }).toList(),
       selected: {_gender},
       onSelectionChanged: (newSelection) {
+        FocusScope.of(context).unfocus();
         if (newSelection.isEmpty) return;
         setState(() {
           _gender = newSelection.first;
