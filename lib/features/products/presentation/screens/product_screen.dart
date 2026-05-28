@@ -27,7 +27,9 @@ class ProductScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Editar producto"),
+        title: Text(productState.product?.id == 'no-id'
+            ? "Nuevo producto"
+            : "Editar producto"),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt))
         ],
