@@ -303,7 +303,7 @@ class _ImageGallery extends StatelessWidget {
               ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 child: Image.asset(
-                  "assets/images/no-image.png",
+                  "assets/images/no-image.jpg",
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: 200,

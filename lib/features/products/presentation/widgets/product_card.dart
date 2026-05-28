@@ -30,7 +30,7 @@ class _ImgProduct extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image.asset(
-          "assets/images/no-image.png",
+          "assets/images/no-image.jpg",
           fit: BoxFit.cover,
           width: double.infinity,
           height: 200,

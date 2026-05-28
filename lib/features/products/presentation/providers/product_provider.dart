@@ -8,7 +8,6 @@ final productProvider = StateNotifierProvider.autoDispose
 
   return ProductNotifier(
       productRepository: productRepository, productId: productId);
-      
 });
 
 class ProductNotifier extends StateNotifier<ProductState> {
@@ -19,8 +18,25 @@ class ProductNotifier extends StateNotifier<ProductState> {
     loadProduct();
   }
 
+  Product newEmptyProduct() => Product(
+      id: 'no-id',
+      title: '',
+      price: 0,
+      description: '',
+      slug: '',
+      stock: 0,
+      sizes: [],
+      gender: '',
+      tags: [],
+      images: []);
+
   Future<void> loadProduct() async {
     try {
+      if (state.id == 'no-id') {
+        state = state.copyWith(isLoading: false, product: newEmptyProduct());
+        return;
+      }
+
       final product = await productRepository.getProductById(state.id);
 
       state = state.copyWith(
