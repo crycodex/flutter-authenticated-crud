@@ -157,6 +157,10 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
   void onImagesChanged(List<String> images) {
     state = state.copyWith(images: images);
   }
+
+  void updateProductImg(String path) {
+    state = state.copyWith(images: [...state.images, path]);
+  }
 }
 
 class ProductFormState {
