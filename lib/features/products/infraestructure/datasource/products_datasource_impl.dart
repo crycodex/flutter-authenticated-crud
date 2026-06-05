@@ -14,6 +14,35 @@ class ProductsDatasourceImpl extends ProductsDatasource {
             baseUrl: Enviroment.apiUrl,
             headers: {"Authorization": "Bearer $accessToken"}));
 
+  Future<String> _uploadFile(String path) async {
+    try {
+      final filename = path.split("/").last;
+
+      final FormData data = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: filename),
+      });
+
+      final response = await dio.post("/files/product", data: data);
+
+      return response.data['image'];
+    } catch (e) {
+      throw ProductErrors(message: 'Error al subir el archivo');
+    }
+  }
+
+  Future<List<String>> _uploadPhotos(List<String> images) async {
+    final photosUploaded =
+        images.where((element) => element.contains("/")).toList();
+    final photosIgnored =
+        images.where((element) => !element.contains("/")).toList();
+
+    final List<Future<String>> uploadTask =
+        photosUploaded.map(_uploadFile).toList();
+    final newPhotos = await Future.wait(uploadTask);
+
+    return [...photosIgnored, ...newPhotos];
+  }
+
   @override
   Future<Product> createProduct(Map<String, dynamic> productLike) async {
     try {
@@ -22,6 +51,9 @@ class ProductsDatasourceImpl extends ProductsDatasource {
           productId != null && productId.isNotEmpty && productId != 'no-id';
 
       final data = Map<String, dynamic>.from(productLike)..remove('id');
+
+      final images = await _uploadPhotos(productLike['images']);
+      data['images'] = images;
 
       final Response<dynamic> response = isUpdating
           ? await dio.patch('/products/$productId', data: data)
